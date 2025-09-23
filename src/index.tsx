@@ -1,233 +1,315 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import { renderer } from './renderer'
 import { serveStatic } from 'hono/cloudflare-workers'
+import { renderer } from './renderer'
+import type { CloudflareBindings, MenuItem, ExtraIngredient, Order, Customer, OrderItem } from './types'
 
-const app = new Hono()
-
-app.use(renderer)
-app.use('/api/*', cors())
-app.use('/static/*', serveStatic({ root: './public' }))
-
-// Datos del menú
-const menuData = {
-  hamburguesas: [
-    { name: "Asadera", ingredients: "Carne+Q.Asadero", price: 63 },
-    { name: "Especial", ingredients: "Carne+Carnes Frías", price: 63 },
-    { name: "Doble", ingredients: "Carne+Jamón+Q.Amarillo", price: 60 },
-    { name: "Champiqueso", ingredients: "Carne+Champiñón+Q.Asadero", price: 76 },
-    { name: "Petra", ingredients: "Carne+Q.Asadero+Tocino", price: 78 },
-    { name: "Campechana", ingredients: "Asadera+Jamón+Q.Amarillo", price: 73 },
-    { name: "Ejecutiva", ingredients: "Carne+Carnes Frías+Salchicha", price: 95 },
-    { name: "Española", ingredients: "Carne+Q.Asadero+Salchicha", price: 95 },
-    { name: "Embajadora", ingredients: "Carne+Carnes Frías+Q.Asadero+Salchicha", price: 108 },
-    { name: "Americana", ingredients: "Doble Carne+Doble Q.Amarillo", price: 100 },
-    { name: "Choriqueso", ingredients: "Chorizo+Q.Asadero", price: 45 },
-    { name: "Ranchera", ingredients: "Carne+Chorizo+Q.Asadero", price: 76 },
-    { name: "Hawaiana", ingredients: "Carne+Piña+Q.Asadero", price: 76 },
-    { name: "Hawaiana Especial", ingredients: "Carne+Piña+Q.Asadero+Carnes Frías", price: 89 },
-    { name: "Especial Asadera", ingredients: "Carne+Q.Asadero+Carnes Frías", price: 76 },
-    { name: "Ahumada", ingredients: "Chuleta", price: 50 },
-    { name: "Ahumada Especial", ingredients: "Chuleta+Carnes Frías", price: 63 },
-    { name: "Mexicana", ingredients: "Chuleta+Carne", price: 84 },
-    { name: "Norteña", ingredients: "Carne+Chuleta+Q.Asadero", price: 97 },
-    { name: "Italiana", ingredients: "Chuleta+Q.Asadero", price: 63 },
-    { name: "Extravagante", ingredients: "Carne+Chuleta+Q.Asadero+Carnes Frías", price: 110 },
-    { name: "Descarnada", ingredients: "Carnes Frías+Q.Amarillo", price: 48 },
-    { name: "Descarnada Asadero", ingredients: "Carnes Frías+Q.Amarillo+Q.Asadero", price: 61 },
-    { name: "Sencilla", ingredients: "Carne de Res", price: 50 },
-    { name: "Big Sencilla", ingredients: "2 Carnes de Res", price: 84 },
-    { name: "Costeña", ingredients: "Camarón+Q.Asadero+Tocino+Ch.Morrón+Sal.Inglesa", price: 96 },
-    { name: "Super Costeña", ingredients: "Camarón+Q.Asadero+Carne de Res+Tocino+Ch.Morrón", price: 130 },
-    { name: "La Popotiña", ingredients: "Carne de Pierna+Tocino+Chile Morrón+Q.Asadero", price: 82 },
-    { name: "Grosera", ingredients: "Salchicha para Asar+Q.Asadero+Tocino", price: 60 },
-    { name: "Super Grosera", ingredients: "Salchicha para Asar+Q.Asadero+Tocino+Carne de Res", price: 94 }
-  ],
-  hotdogs: [
-    { name: "Dogo de Pavo", ingredients: "Salchicha de Pavo", price: 50 },
-    { name: "Grosero", ingredients: "Salchicha para Asar+Q.Asadero+Tocino Rebanado", price: 60 },
-    { name: "Asadero", ingredients: "Salchicha+Q.Asadero", price: 73 },
-    { name: "Big Grosero", ingredients: "Grosero+Carnes Frías", price: 76 },
-    { name: "Choriqueso", ingredients: "Salchicha+Chorizo+Q.Asadero", price: 76 },
-    { name: "Champiqueso", ingredients: "Salchicha+Champiñones+Q.Asadero", price: 63 },
-    { name: "Campechano", ingredients: "Asadero+Jamón+Q.Amarillo", price: 73 },
-    { name: "Especial", ingredients: "Salchicha+C.Frías", price: 63 },
-    { name: "Hawaiano", ingredients: "Salchicha+Q.Asadero+Piña", price: 76 },
-    { name: "Hawaiano Especial", ingredients: "Salchicha+Q.Asadero+Piña+C.Frías", price: 89 },
-    { name: "Doble", ingredients: "Salchicha+Jamón+Q.Amarillo", price: 60 },
-    { name: "Descarnado", ingredients: "Jamón+Pastel+Q.de Puerco+Mortadela+Salami", price: 48 },
-    { name: "de Pierna", ingredients: "Salchicha de Pierna", price: 48 }
-  ],
-  sincronizadas: [
-    { name: "Sincronizada Sencilla", ingredients: "T.Harina+Jamón+Q.Asadero+Q.Amarillo", price: 51 },
-    { name: "Sincronizada Especial", ingredients: "T.Harina+Jamón+Q.Asadero+Q.Amarillo+Pierna", price: 81 },
-    { name: "Sincronizada Super", ingredients: "T.Harina+Jamón+Q.Asadero+Q.Amarillo+Champiñones", price: 64 },
-    { name: "Sincronizada Matona", ingredients: "T.Harina+Jamón+Q.Asadero+Q.Amarillo+Pierna+Salchicha Grosera", price: 125 },
-    { name: "Sincronizada Costeña", ingredients: "T.Harina+Jamón+Q.Asadero+Q.Amarillo+Camarón+Pierna", price: 125 }
-  ],
-  tortas: [
-    { name: "Torta Sencilla", ingredients: "Telera+Pierna", price: 50 },
-    { name: "Torta Especial", ingredients: "Carnes Frías+Pierna", price: 63 },
-    { name: "Torta Asadera", ingredients: "Pierna+Q.Asadero", price: 63 },
-    { name: "Torta Cubana", ingredients: "Jamón+Q.Asadero+Salchicha+Pierna", price: 101 }
-  ],
-  burros: [
-    { name: "Burro Sencillo", ingredients: "Carne de Pierna", price: 50 },
-    { name: "Burro Asadero", ingredients: "Carne de Pierna+Q.Asadero", price: 63 },
-    { name: "Burro Especial", ingredients: "Carne de Pierna+Carnes Frías", price: 63 },
-    { name: "Burro Costeño", ingredients: "Carne de Pierna+Camarón+Q.Asadero", price: 106 }
-  ]
+type Env = {
+  Bindings: CloudflareBindings
 }
 
-const ingredientesExtra = [
-  { name: "Carne Extra", price: 15 },
-  { name: "Queso Asadero", price: 8 },
-  { name: "Queso Amarillo", price: 8 },
-  { name: "Tocino", price: 12 },
-  { name: "Jamón", price: 10 },
-  { name: "Champiñones", price: 10 },
-  { name: "Piña", price: 8 },
-  { name: "Chorizo", price: 12 },
-  { name: "Camarón", price: 25 },
-  { name: "Chile Morrón", price: 6 },
-  { name: "Carnes Frías", price: 10 },
-  { name: "Salchicha", price: 12 }
-]
+const app = new Hono<Env>()
 
-// API para obtener datos del menú
-app.get('/api/menu', (c) => {
-  return c.json({ menu: menuData, extras: ingredientesExtra })
+// Enable CORS
+app.use('/api/*', cors())
+
+// Serve static files
+app.use('/static/*', serveStatic({ root: './public' }))
+
+app.use(renderer)
+
+// API Routes
+app.get('/api/menu', async (c) => {
+  const { DB } = c.env
+  const result = await DB.prepare(`
+    SELECT * FROM menu_items ORDER BY category, name
+  `).all()
+  return c.json(result.results)
 })
 
-// API para calcular total del pedido
-app.post('/api/calculate-order', async (c) => {
-  const { items } = await c.req.json()
+app.get('/api/extras', async (c) => {
+  const { DB } = c.env
+  const result = await DB.prepare(`
+    SELECT * FROM extra_ingredients ORDER BY category, name
+  `).all()
+  return c.json(result.results)
+})
+
+app.post('/api/orders', async (c) => {
+  const { DB } = c.env
+  const orderData: Order = await c.req.json()
   
-  let total = 0
-  const orderDetails = []
-  
-  for (const item of items) {
-    let itemTotal = item.basePrice
-    const extras = []
+  try {
+    // Start transaction - insert customer
+    const customerResult = await DB.prepare(`
+      INSERT OR REPLACE INTO customers (name, whatsapp, address, between_streets, neighborhood)
+      VALUES (?, ?, ?, ?, ?)
+    `).bind(
+      orderData.customer.name,
+      orderData.customer.whatsapp,
+      orderData.customer.address || '',
+      orderData.customer.between_streets || '',
+      orderData.customer.neighborhood || ''
+    ).run()
     
-    if (item.extras && item.extras.length > 0) {
-      for (const extra of item.extras) {
-        const extraItem = ingredientesExtra.find(e => e.name === extra)
-        if (extraItem) {
-          itemTotal += extraItem.price
-          extras.push({ name: extra, price: extraItem.price })
-        }
-      }
+    const customerId = customerResult.meta.last_row_id
+    
+    // Insert order
+    const orderResult = await DB.prepare(`
+      INSERT INTO orders (customer_id, total_amount, delivery_type, delivery_cost, status)
+      VALUES (?, ?, ?, ?, 'pending')
+    `).bind(
+      customerId,
+      orderData.total_amount,
+      orderData.delivery_type,
+      orderData.delivery_cost
+    ).run()
+    
+    const orderId = orderResult.meta.last_row_id
+    
+    // Insert order items
+    for (const item of orderData.items) {
+      await DB.prepare(`
+        INSERT INTO order_items (order_id, menu_item_id, quantity, unit_price, extras, vegetables, sauces)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `).bind(
+        orderId,
+        item.menu_item.id,
+        item.quantity,
+        item.total_price / item.quantity,
+        JSON.stringify(item.extras),
+        JSON.stringify(item.vegetables),
+        JSON.stringify(item.sauces)
+      ).run()
     }
     
-    itemTotal *= item.quantity
-    total += itemTotal
+    // Insert beverages if any
+    if (orderData.beverages > 0) {
+      await DB.prepare(`
+        INSERT INTO beverages (order_id, quantity, unit_price)
+        VALUES (?, ?, 30.00)
+      `).bind(orderId, orderData.beverages).run()
+    }
     
-    orderDetails.push({
-      name: item.name,
-      quantity: item.quantity,
-      basePrice: item.basePrice,
-      extras: extras,
-      subtotal: itemTotal
+    return c.json({ 
+      success: true, 
+      orderId,
+      whatsappMessage: generateWhatsAppMessage(orderData, orderId as number)
     })
+    
+  } catch (error) {
+    console.error('Error creating order:', error)
+    return c.json({ success: false, error: 'Error creating order' }, 500)
+  }
+})
+
+function generateWhatsAppMessage(order: Order, orderId: number): string {
+  let message = `🍔 *GEORGE BURGER* 🍔\n`
+  message += `📋 *Pedido #${orderId}*\n\n`
+  
+  message += `👤 *Cliente:* ${order.customer.name}\n`
+  message += `📱 *WhatsApp:* ${order.customer.whatsapp}\n`
+  
+  if (order.delivery_type === 'delivery') {
+    message += `🏠 *Entrega a domicilio*\n`
+    message += `📍 *Dirección:* ${order.customer.address}\n`
+    if (order.customer.between_streets) {
+      message += `🛣️ *Entre calles:* ${order.customer.between_streets}\n`
+    }
+    if (order.customer.neighborhood) {
+      message += `🏘️ *Colonia:* ${order.customer.neighborhood}\n`
+    }
+  } else {
+    message += `🏃 *Para recoger en tienda*\n`
   }
   
-  return c.json({ orderDetails, total })
-})
+  message += `\n📋 *PEDIDO:*\n`
+  
+  for (const item of order.items) {
+    message += `\n${item.quantity}x *${item.menu_item.name}* - $${item.total_price}\n`
+    message += `   ${item.menu_item.base_ingredients}\n`
+    
+    if (item.extras.length > 0) {
+      message += `   + Extra: ${item.extras.map(e => e.name).join(', ')}\n`
+    }
+    
+    const selectedVeggies = item.vegetables.map(v => v.name).join(', ')
+    const selectedSauces = item.sauces.map(s => s.name).join(', ')
+    
+    if (selectedVeggies) {
+      message += `   🥬 Verduras: ${selectedVeggies}\n`
+    }
+    if (selectedSauces) {
+      message += `   🥄 Aderezos: ${selectedSauces}\n`
+    }
+  }
+  
+  if (order.beverages > 0) {
+    message += `\n${order.beverages}x *Bebida* - $${order.beverages * 30}\n`
+  }
+  
+  message += `\n💰 *Subtotal:* $${order.total_amount - order.delivery_cost}\n`
+  
+  if (order.delivery_cost > 0) {
+    message += `🚚 *Costo de entrega:* $${order.delivery_cost}\n`
+  }
+  
+  message += `💵 *TOTAL:* $${order.total_amount}\n`
+  message += `\n¡Gracias por tu pedido! 🎉`
+  
+  return message
+}
 
 app.get('/', (c) => {
   return c.render(
-    <div>
+    <div className="min-h-screen bg-gradient-to-br from-red-600 to-orange-500">
       {/* Header */}
-      <header class="bg-red-600 text-white shadow-lg">
-        <div class="container mx-auto px-4 py-6">
-          <div class="text-center">
-            <h1 class="text-4xl font-bold mb-2">
-              <i class="fas fa-hamburger mr-3"></i>
-              GEORGE BURGERS
+      <div className="bg-white shadow-lg">
+        <div className="container mx-auto px-4 py-6">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-red-600 mb-2">
+              🍔 GEORGE BURGER 🍔
             </h1>
-            <p class="text-xl">¡El mejor sabor de la ciudad!</p>
+            <p className="text-gray-600">Hamburguesas, Hotdogs, Sincronizadas y más</p>
           </div>
         </div>
-      </header>
+      </div>
 
-      {/* Navigation */}
-      <nav class="bg-yellow-400 shadow-md sticky top-0 z-40">
-        <div class="container mx-auto px-4">
-          <div class="flex justify-center space-x-1 py-3">
-            <button onclick="showCategory('hamburguesas')" class="category-btn bg-red-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-700 transition-colors">
-              <i class="fas fa-hamburger mr-2"></i>Hamburguesas
-            </button>
-            <button onclick="showCategory('hotdogs')" class="category-btn bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-orange-700 transition-colors">
-              <i class="fas fa-hotdog mr-2"></i>Hot-Dogs
-            </button>
-            <button onclick="showCategory('sincronizadas')" class="category-btn bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition-colors">
-              <i class="fas fa-cheese mr-2"></i>Sincronizadas
-            </button>
-            <button onclick="showCategory('tortas')" class="category-btn bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
-              <i class="fas fa-bread-slice mr-2"></i>Tortas
-            </button>
-            <button onclick="showCategory('burros')" class="category-btn bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700 transition-colors">
-              <i class="fas fa-burrito mr-2"></i>Burros
-            </button>
-          </div>
-        </div>
-      </nav>
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          {/* Menu Section */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-lg shadow-xl p-6">
+              <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
+                🍽️ MENÚ
+              </h2>
+              
+              {/* Category Tabs */}
+              <div className="flex flex-wrap justify-center mb-6 gap-2" id="category-tabs">
+                <button className="category-btn active bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition" data-category="hamburguesas">
+                  🍔 Hamburguesas
+                </button>
+                <button className="category-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-300 transition" data-category="hotdogs">
+                  🌭 Hotdogs
+                </button>
+                <button className="category-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-300 transition" data-category="sincronizadas">
+                  🌮 Sincronizadas
+                </button>
+                <button className="category-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-300 transition" data-category="tortas">
+                  🥪 Tortas
+                </button>
+                <button className="category-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-300 transition" data-category="burros">
+                  🌯 Burros
+                </button>
+              </div>
 
-      <div class="container mx-auto px-4 py-8">
-        <div class="flex gap-8">
-          {/* Menu Items */}
-          <div class="flex-1">
-            <div id="menu-content">
-              <div class="text-center py-12">
-                <i class="fas fa-utensils text-6xl text-gray-400 mb-4"></i>
-                <p class="text-xl text-gray-600">Selecciona una categoría para ver nuestro delicioso menú</p>
+              {/* Menu Items Container */}
+              <div id="menu-container" className="space-y-4">
+                <div className="text-center text-gray-500 py-8">
+                  <p>Cargando menú...</p>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Cart Sidebar */}
-          <div class="w-80 bg-white rounded-lg shadow-lg p-6 h-fit sticky top-24">
-            <h3 class="text-xl font-bold mb-4 text-center border-b pb-2">
-              <i class="fas fa-shopping-cart mr-2 text-red-600"></i>
-              Tu Pedido
-            </h3>
-            <div id="cart-items" class="space-y-3 mb-4 min-h-20">
-              <div class="text-center text-gray-500 py-8">
-                <i class="fas fa-shopping-basket text-3xl mb-2"></i>
-                <p>Tu carrito está vacío</p>
+          {/* Cart Section */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-lg shadow-xl p-6 sticky top-4">
+              <h2 className="text-xl font-bold mb-4 text-center text-gray-800">
+                🛒 Tu Pedido
+              </h2>
+              
+              <div id="cart-items" className="space-y-3 mb-6">
+                <p className="text-gray-500 text-center py-4">Tu carrito está vacío</p>
               </div>
-            </div>
-            <div class="border-t pt-4">
-              <div class="flex justify-between items-center mb-4">
-                <span class="text-lg font-bold">Total:</span>
-                <span id="cart-total" class="text-2xl font-bold text-red-600">$0</span>
+              
+              {/* Beverages Section */}
+              <div className="border-t pt-4 mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-semibold">🥤 Bebidas ($30 c/u)</span>
+                </div>
+                <div className="flex items-center justify-center space-x-3">
+                  <button id="beverage-decrease" className="bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-600">-</button>
+                  <span id="beverage-count" className="font-bold text-lg w-8 text-center">0</span>
+                  <button id="beverage-increase" className="bg-green-500 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-green-600">+</button>
+                </div>
               </div>
-              <button id="checkout-btn" class="w-full bg-red-600 text-white py-3 rounded-lg font-bold hover:bg-red-700 transition-colors disabled:bg-gray-400" disabled>
-                <i class="fas fa-credit-card mr-2"></i>
-                Realizar Pedido
+              
+              {/* Delivery Options */}
+              <div className="border-t pt-4 mb-4">
+                <h3 className="font-semibold mb-3">🚚 Opciones de entrega:</h3>
+                <div className="space-y-2">
+                  <label className="flex items-center space-x-2">
+                    <input type="radio" name="delivery" value="pickup" className="text-red-500" defaultChecked />
+                    <span>🏃 Pasar a recoger (Gratis)</span>
+                  </label>
+                  <label className="flex items-center space-x-2">
+                    <input type="radio" name="delivery" value="delivery" className="text-red-500" />
+                    <span>🏠 Entrega a domicilio (+$20)</span>
+                  </label>
+                </div>
+              </div>
+              
+              {/* Customer Info Form */}
+              <div id="customer-form" className="border-t pt-4 mb-4">
+                <h3 className="font-semibold mb-3">👤 Datos del cliente:</h3>
+                <div className="space-y-3">
+                  <input type="text" id="customer-name" placeholder="Nombre completo" className="w-full p-2 border rounded-lg" required />
+                  <input type="tel" id="customer-whatsapp" placeholder="WhatsApp (ej: 5211234567890)" className="w-full p-2 border rounded-lg" required />
+                  
+                  <div id="delivery-fields" style={{display: 'none'}}>
+                    <input type="text" id="customer-address" placeholder="Dirección completa" className="w-full p-2 border rounded-lg" />
+                    <input type="text" id="customer-streets" placeholder="Entre qué calles" className="w-full p-2 border rounded-lg" />
+                    <input type="text" id="customer-neighborhood" placeholder="Colonia" className="w-full p-2 border rounded-lg" />
+                  </div>
+                </div>
+              </div>
+              
+              {/* Total */}
+              <div className="border-t pt-4 mb-4">
+                <div className="flex justify-between font-bold text-lg">
+                  <span>💵 TOTAL:</span>
+                  <span id="cart-total">$0</span>
+                </div>
+              </div>
+              
+              {/* Order Button */}
+              <button id="place-order" className="w-full bg-green-600 text-white py-3 px-6 rounded-lg font-bold text-lg hover:bg-green-700 transition" disabled>
+                🛒 HACER PEDIDO
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Modal for extras */}
-      <div id="extras-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
-        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 max-h-96 overflow-y-auto">
-          <div class="flex justify-between items-center mb-4">
-            <h3 id="modal-title" class="text-xl font-bold"></h3>
-            <button onclick="closeExtrasModal()" class="text-gray-500 hover:text-gray-700">
-              <i class="fas fa-times text-xl"></i>
-            </button>
+      {/* Order Confirmation Modal */}
+      <div id="order-modal" className="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4" style={{zIndex: 1000}}>
+        <div className="bg-white rounded-lg max-w-md w-full p-6">
+          <div className="text-center">
+            <h3 className="text-2xl font-bold text-green-600 mb-4">¡Pedido Realizado! 🎉</h3>
+            <p className="mb-4">Tu pedido ha sido enviado por WhatsApp</p>
+            
+            <div className="bg-gray-100 p-4 rounded-lg mb-4 text-left">
+              <h4 className="font-bold mb-2">Mensaje enviado:</h4>
+              <div id="whatsapp-preview" className="text-sm whitespace-pre-line"></div>
+            </div>
+            
+            <div className="flex space-x-3">
+              <button id="send-whatsapp" className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition">
+                📱 Abrir WhatsApp
+              </button>
+              <button id="close-modal" className="flex-1 bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600 transition">
+                Cerrar
+              </button>
+            </div>
           </div>
-          <div id="modal-content"></div>
         </div>
       </div>
 
       <script src="/static/app.js"></script>
-    </div>,
-    { title: 'GEORGE BURGERS - Menú Digital' }
+    </div>
   )
 })
 

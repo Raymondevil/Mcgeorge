@@ -1,110 +1,104 @@
-# GEORGE BURGERS - Menú Digital
+# 🍔 George Burger - Menú Digital 
 
 ## Descripción del Proyecto
-**GEORGE BURGERS** es un menú digital interactivo desarrollado al estilo McDonald's que permite a los clientes navegar por diferentes categorías de alimentos, personalizar sus pedidos con ingredientes extra y gestionar un carrito de compras.
+Sistema de pedidos online para George Burger, un negocio de hamburguesas que ofrece hamburguesas, hotdogs, sincronizadas, tortas y burros. La aplicación permite a los clientes hacer pedidos desde su celular, gestiona una base de datos de clientes y envía los pedidos por WhatsApp.
 
-## 🎯 Características Principales
-- **Interfaz moderna estilo McDonald's** con navegación por categorías
-- **5 categorías de productos**: Hamburguesas, Hot-Dogs, Sincronizadas, Tortas y Burros
-- **Sistema de carrito de compras** completo con cálculo automático de totales
-- **Personalización de productos** con ingredientes extra
-- **Diseño responsive** optimizado para móviles y desktop
-- **Animaciones y efectos visuales** para mejor experiencia de usuario
+## 🌐 URLs de Acceso
+- **Aplicación Web**: https://3000-itvd8mbiqgz2jbtsnyx6z-6532622b.e2b.dev
+- **API Menu**: https://3000-itvd8mbiqgz2jbtsnyx6z-6532622b.e2b.dev/api/menu
+- **API Extras**: https://3000-itvd8mbiqgz2jbtsnyx6z-6532622b.e2b.dev/api/extras
 
-## 🌐 URLs del Proyecto
-- **Desarrollo**: https://3000-i8v10735hbdcujo1jq8bh-6532622b.e2b.dev
-- **API Menú**: https://3000-i8v10735hbdcujo1jq8bh-6532622b.e2b.dev/api/menu
-- **API Cálculo**: https://3000-i8v10735hbdcujo1jq8bh-6532622b.e2b.dev/api/calculate-order
+## ✨ Funcionalidades Implementadas
+- ✅ **Menú Digital Completo**: 5 categorías (hamburguesas, hotdogs, sincronizadas, tortas, burros)
+- ✅ **Selección de Ingredientes Extra**: Carne, quesos, tocino, camarón, etc. con precios individuales
+- ✅ **Verduras y Aderezos**: Preseleccionados por defecto (jitomate, cebolla, crema, etc.)
+- ✅ **Selección de Cantidades**: Para cada producto del menú
+- ✅ **Opciones de Entrega**: Domicilio (+$20) o Recoger en tienda
+- ✅ **Formulario de Cliente**: Nombre, WhatsApp, dirección (si es domicilio)
+- ✅ **Base de Datos**: Almacena clientes, pedidos y historial
+- ✅ **Integración WhatsApp**: Envío automático de pedidos al número +523111235595
+- ✅ **Vista Previa del Mensaje**: Muestra el texto que se enviará por WhatsApp
+- ✅ **Bebidas**: Opción de agregar bebidas ($30 c/u)
+- ✅ **Carrito de Compras**: Manejo completo del pedido antes de enviar
+- ✅ **Diseño Responsivo**: Funciona perfecto en celulares Android
 
-## 🍔 Categorías del Menú
+## 🏗️ Arquitectura de Datos
+### Base de Datos (Cloudflare D1 SQLite)
+- **customers**: Almacena información de clientes
+- **orders**: Registra todos los pedidos realizados  
+- **menu_items**: Catálogo completo de productos (56 items)
+- **extra_ingredients**: Ingredientes adicionales con precios
+- **order_items**: Detalles de cada item en los pedidos
+- **beverages**: Registro de bebidas pedidas
 
-### Hamburguesas (31 variedades)
-Desde la clásica "Sencilla" hasta la "Super Costeña" con camarones, incluyendo especialidades como:
-- **Embajadora** - La más completa con múltiples carnes ($108)
-- **Super Costeña** - Con camarones y carnes ($130) 
-- **Extravagante** - Mezcla de carnes y quesos ($110)
+### Productos del Menú
+- **30 Hamburguesas**: Desde Sencilla ($50) hasta Super Costeña ($130)
+- **13 Hotdogs**: Desde De Pierna ($48) hasta Hawaiano Especial ($89)  
+- **5 Sincronizadas**: Desde Sencilla ($51) hasta Matona/Costeña ($125)
+- **4 Tortas**: Desde Sencilla ($50) hasta Cubana ($101)
+- **4 Burros**: Desde Sencillo ($50) hasta Costeño ($106)
 
-### Hot-Dogs (13 variedades)
-Desde el básico "Dogo de Pavo" hasta especialidades como el "Hawaiano Especial"
+### Ingredientes Extra (13 tipos)
+- Carne ($34), Carnes Frías ($13), Q. Asadero ($13)
+- Salchicha para Asar ($44), Camarón ($46), Tocino ($15)
+- Y más con precios específicos
 
-### Sincronizadas (5 variedades) 
-Tortillas de harina rellenas, desde la sencilla hasta la "Matona" y "Costeña"
+## 📱 Guía de Uso
+1. **Seleccionar Categoría**: Toca las pestañas (Hamburguesas, Hotdogs, etc.)
+2. **Elegir Producto**: Ve los precios base y ingredientes incluidos  
+3. **Personalizar**: 
+   - Agregar ingredientes extra (con costo)
+   - Seleccionar verduras (incluidas, preseleccionadas)
+   - Elegir aderezos (incluidos, preseleccionados)
+   - Ajustar cantidad
+4. **Agregar al Carrito**: El producto se suma al pedido
+5. **Opciones de Entrega**: 
+   - 🏃 Recoger en tienda (gratis)
+   - 🏠 Entrega a domicilio (+$20)
+6. **Datos del Cliente**: Llenar nombre y WhatsApp (+ dirección si es domicilio)
+7. **Bebidas** (opcional): Agregar bebidas ($30 c/u)
+8. **Hacer Pedido**: Se genera el mensaje y se puede enviar por WhatsApp
 
-### Tortas (4 variedades)
-Tradicionales tortas mexicanas con diferentes combinaciones
+## 📋 Funcionalidades Pendientes de Implementar
+- ⏳ **Gestión de Inventario**: Control de productos disponibles
+- ⏳ **Horarios de Atención**: Validación de horarios de servicio  
+- ⏳ **Múltiples Ubicaciones**: Soporte para varias sucursales
+- ⏳ **Métodos de Pago**: Integración con pagos digitales
+- ⏳ **Sistema de Notificaciones**: SMS o push notifications
+- ⏳ **Panel de Administración**: Para gestionar pedidos y menú
+- ⏳ **Reportes de Ventas**: Dashboard con estadísticas
 
-### Burros (4 variedades)
-Desde el sencillo hasta el "Costeño" con camarones
-
-## 🛍️ Funcionalidades del Sistema
-
-### Sistema de Carrito
-- **Agregar productos** con un clic
-- **Personalización** con ingredientes extra
-- **Cálculo automático** de precios y totales
-- **Gestión de cantidades** y eliminación de productos
-- **Confirmación de pedido** simulada
-
-### Ingredientes Extra Disponibles
-- Carne Extra ($15)
-- Queso Asadero/Amarillo ($8)
-- Tocino ($12)
-- Jamón ($10)
-- Champiñones ($10)
-- Camarón ($25)
-- Y más...
-
-### Características Técnicas
-- **Framework**: Hono + TypeScript
-- **Frontend**: Vanilla JS + TailwindCSS + FontAwesome
-- **Arquitectura**: SPA con APIs REST
-- **Responsive Design**: Optimizado para todos los dispositivos
-- **Notificaciones**: Sistema de feedback visual
-
-## 🎨 Experiencia de Usuario
-- **Navegación intuitiva** por categorías con colores distintivos
-- **Modal de personalización** para ingredientes extra
-- **Carrito lateral fijo** siempre visible
-- **Animaciones suaves** y transiciones
-- **Notificaciones** de confirmación
-- **Diseño atractivo** con gradientes y efectos hover
-
-## 🚀 Estado del Desarrollo
-- ✅ **Estructura básica** del proyecto Hono
-- ✅ **Diseño completo** del menú digital
-- ✅ **Sistema de carrito** funcional
-- ✅ **Cálculo de precios** y extras
-- ✅ **APIs REST** para datos y cálculos
-- ⏳ **Deployment** a Cloudflare Pages (pendiente)
-
-## 📊 Estadísticas del Menú
-- **Total de productos**: 57 diferentes opciones
-- **Rango de precios**: $45 - $130
-- **Ingredientes extra**: 12 opciones disponibles
-- **Categorías**: 5 secciones principales
-
-## 🛠️ Tecnologías Utilizadas
+## 🛠️ Stack Tecnológico  
+- **Frontend**: HTML5, CSS3, JavaScript (Vanilla), TailwindCSS
 - **Backend**: Hono Framework (TypeScript)
-- **Frontend**: HTML5 + CSS3 + JavaScript ES6+
-- **Estilos**: TailwindCSS + CSS personalizado
-- **Iconos**: FontAwesome 6
-- **Build**: Vite
-- **Deployment**: Cloudflare Pages (configurado)
+- **Base de Datos**: Cloudflare D1 (SQLite distribuido)
+- **Deployment**: Cloudflare Pages/Workers
+- **Build Tool**: Vite
+- **Package Manager**: npm
 
-## 💡 Próximos Pasos Recomendados
-1. **Deployment a Cloudflare Pages** para URL pública permanente
-2. **Sistema de pagos** integrado (Stripe/PayPal)
-3. **Base de datos** para persistir pedidos (Cloudflare D1)
-4. **Sistema de autenticación** de usuarios
-5. **Panel de administración** para gestionar menú y pedidos
-6. **Integración WhatsApp** para confirmación de pedidos
-7. **Sistema de delivery** con mapas y tracking
+## 🚀 Estado del Deployment
+- **Estado**: ✅ Activo y funcional
+- **Plataforma**: Sandbox de desarrollo
+- **Última Actualización**: 2025-09-19
 
-## 🎯 Guía de Uso para Clientes
-1. **Selecciona una categoría** (Hamburguesas, Hot-Dogs, etc.)
-2. **Explora los productos** con precios e ingredientes
-3. **Agrega al carrito** directamente o personaliza con extras
-4. **Revisa tu pedido** en el carrito lateral
-5. **Confirma tu pedido** con el botón de checkout
+## 📞 Configuración de WhatsApp
+- **Número de Destino**: +523111235595
+- **Formato del Mensaje**: Incluye detalles completos del pedido
+- **Funcionalidades**: 
+  - Información del cliente
+  - Detalles de productos y cantidades
+  - Ingredientes extra seleccionados  
+  - Verduras y aderezos elegidos
+  - Total con desglose de precios
+  - Tipo de entrega y dirección
 
-¡Disfruta la experiencia de **GEORGE BURGERS**! 🍔🌟
+## 🔄 Próximos Pasos Recomendados
+1. **Pruebas de Usuario**: Probar el flujo completo desde un celular Android
+2. **Optimización de Velocidad**: Mejorar tiempos de carga
+3. **Validación de Datos**: Más validaciones en formularios
+4. **Gestión de Errores**: Mejor manejo de errores de red
+5. **Deploy a Producción**: Configurar dominio personalizado en Cloudflare
+
+---
+
+**Desarrollado con ❤️ para George Burger** 🍔
